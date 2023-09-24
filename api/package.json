@@ -11,6 +11,7 @@
   "license": "ISC",
   "dependencies": {
     "@helia/json": "^1.0.2",
+    "@helia/strings": "^1.0.0",
     "@thirdweb-dev/sdk": "^3.10.61",
     "body-parser": "^1.20.2",
     "cors": "^2.8.5",

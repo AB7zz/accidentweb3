@@ -2,7 +2,8 @@ import React, { useState, useRef } from 'react';
 import { useStateContext } from '../context/StateContext';
 
 function Submit() {
-  const { address } = useStateContext();
+  const { address, apiUrl } = useStateContext();
+  console.log(apiUrl)
   const videoRef = useRef(null);
   const inputRef = useRef(null);
   const canvasRef = useRef(null);
@@ -44,6 +45,8 @@ function Submit() {
     const imageDataUrl = canvas.toDataURL('image/jpeg');
 
     inputRef.current.value = imageDataUrl;
+
+    console.log(imageDataUrl)
 
 
     setCapturedImage(imageDataUrl);
@@ -100,13 +103,13 @@ function Submit() {
           </div>
         </div>
         <div className="mb-6">
-          {/* <input
+          <input
             ref={inputRef}
             type="text"
             id="snapshot"
-            className="border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:border-gray-600 dark:placeholder-gray-400 dark:focus:ring-blue-500 dark:focus:border-blue-500"
+            className="hidden border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:border-gray-600 dark:placeholder-gray-400 dark:focus:ring-blue-500 dark:focus:border-blue-500"
             readOnly
-          /> */}
+          />
         </div>
         {capturedImage && (
           <div className="mb-6">

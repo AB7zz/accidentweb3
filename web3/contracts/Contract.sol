@@ -11,11 +11,9 @@ contract DeAcc{
     }
 
     struct userAccident {
-        string loc;
-        string date;
-        string time;
         string snapShot;
-        string plate;
+        string lat;
+        string long;
         address user;
     }
 
@@ -39,9 +37,9 @@ contract DeAcc{
         accidents[numberOfAccidents] = Accident(_loc, _date, _time, _snapShot, _plate);
     }
 
-    function userAddsAccident(string memory _loc, string memory _date, string memory _time, string memory _snapShot, string memory _plate) public {
+    function userAddsAccident(string memory _snapShot, string memory _lat, string memory _long) public {
         numberOfUserAccidents++;
-        userAccidents[numberOfUserAccidents] = userAccident(_loc, _date, _time, _snapShot, _plate, msg.sender);
+        userAccidents[numberOfUserAccidents] = userAccident(_snapShot, _lat, _long, msg.sender);
     }
 
     function getAccidents() public view returns(Accident[] memory) {
@@ -68,8 +66,8 @@ contract DeAcc{
         return (accidents[_id].loc, accidents[_id].date, accidents[_id].time, accidents[_id].snapShot, accidents[_id].plate);
     }
 
-    function getUserAccident(uint256 _id) public view returns(string memory, string memory, string memory, string memory, string memory, address) {
-        return (userAccidents[_id].loc, userAccidents[_id].date, userAccidents[_id].time, userAccidents[_id].snapShot, userAccidents[_id].plate, userAccidents[_id].user);
+    function getUserAccident(uint256 _id) public view returns(string memory, string memory, string memory, address) {
+        return (userAccidents[_id].snapShot, userAccidents[_id].lat, userAccidents[_id].long, userAccidents[_id].user);
     }
 
     function reqInsurance(string memory _name, string memory _phone, uint256 _blockNo) public {
