@@ -1,11 +1,17 @@
 # %%
-pip install geopy
+python pip install geopy
 
 # %%
-pip install scikit-learn
+python pip install geocoder
 
 # %%
-pip install twilio
+python pip install scikit-image
+
+# %%
+python pip install scikit-learn
+
+# %%
+python pip install twilio
 
 # %%
 import os
@@ -22,6 +28,8 @@ import numpy as np    # for mathematical operations
 from keras.utils import np_utils
 from matplotlib import pyplot as plt 
 from skimage.transform import resize   # for resizing images
+import datetime
+import base64
 
 # %%
 count = 0
@@ -29,7 +37,7 @@ videoFile = "Accidents.mp4"
 cap = cv2.VideoCapture(videoFile)   # capturing the video from the given path
 frameRate = cap.get(5) #frame rate
 x=1
-path = "/traindata/"
+path = "./traindata/"
 while(cap.isOpened()):
     frameId = cap.get(1) #current frame number
     ret, frame = cap.read()
@@ -115,29 +123,16 @@ model.fit(train, y_train, epochs=100, validation_data=(X_valid, y_valid))
 # %%
 model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
 
-# # %%
-# import joblib
-
-
-# joblib.dump(model, 'trained_model.pkl')
-# #saving model to local
-
-# # %%
-# # Load the saved model
-# import joblib
-# model = joblib.load('trained_model.pkl')
-
-
 # %%
 count = 0
-videoFile = "Accident-2.mp4"
+videoFile = "Accident-1.mp4"
 cap = cv2.VideoCapture(videoFile)
 frameRate = cap.get(5) #frame rate
 x=1
 while(cap.isOpened()):
     frameId = cap.get(1) #current frame number
     ret, frame = cap.read()
-    path="test/"
+    path="./test/"
     if (ret != True):
         break
     if (frameId % math.floor(frameRate) == 0):
@@ -249,13 +244,36 @@ while(True):
     else:
         break
 if flag==1:
+    
+    with open(AccSnapshotDir + snapshot_filename, 'rb') as image_file:
+        image_binary = image_file.read()
+    base64_encoded = base64.b64encode(image_binary).decode('utf-8')
+    # print(locname, datetime.datetime.now(), base64_encoded)
     client.messages.create(
                  body="Accident detected in "+locname.address,
                  from_= "+12568040182",
                  to= "+919074062399"
                  )
+    # print(str(datetime.datetime.now().strftime("%X")))
+    data = {
+    "_loc": str(locname),
+    "_time": str(datetime.datetime.now().strftime("%X")),
+    "_date": str(datetime.datetime.now().strftime("%x")),
+    "_plate" : "MH 12 1234",
+    "snapShot": base64_encoded
+    } 
+    # files = {'_snapShot': open(AccSnapshotDir + snapshot_filename, 'rb')}
+    response = requests.post('http://localhost:3000/addAccident', json=data)
+    if response.status_code == 200:
+        print("POST request successful")
+    else:
+        print("POST request failed with status code:", response.status_code)
+        print("Response content:", response.text)
 
 # release the cap object
 cap.release()
 # close all windows
 cv2.destroyAllWindows()
+
+
+
