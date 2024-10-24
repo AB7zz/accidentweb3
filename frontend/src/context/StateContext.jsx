@@ -6,7 +6,7 @@ const StateContext = createContext()
 export const StateContextProvider = ({children}) => {
     const address = useAddress()
     const connect = useMetamask()
-    const apiUrl = 'http://localhost:3000'
+    const apiUrl = 'https://hackcdent-891d0b31e96e.herokuapp.com'
 
     return(
         <StateContext.Provider value={{

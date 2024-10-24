@@ -5,6 +5,7 @@ import dotenv from 'dotenv'
 import { Configuration, OpenAIApi } from "openai";
 import cors from 'cors'
 import { createHelia } from 'helia'
+import { strings } from '@helia/strings'
 import { json } from '@helia/json'
 
 dotenv.config()
@@ -19,9 +20,28 @@ app.use(bodyParser.json());
 const sdk = ThirdwebSDK.fromPrivateKey(`0x${process.env.PRIVATE_KEY}`, "mumbai", {
   secretKey: process.env.SECRET_KEY
 });
+console.log(process.env.CONTRACT_ADDRESS)
+// const contract = await sdk.getContract(process.env.CONTRACT_ADDRESS)
+
+const contractPromise = new Promise((resolve, reject) => {
+  sdk.getContract(process.env.CONTRACT_ADDRESS).then((contract) => {
+    resolve(contract);
+  }).catch((error) => {
+    reject(error);
+  });
+});
+
+let contract
+contractPromise.then((_contract) => {
+  contract = _contract
+}).catch((error) => {
+  console.log(error)
+});
 
 const helia = await createHelia()
-const j = json(helia)
+const j = strings(helia)
+// const image = await j.get("bafkreiabxqxk3sr2brhb355cuumzpuxcdoonozmv2zn46buzvz2lw6nba4")
+// console.log(image)
 
 app.get('/', async(req, res) => {
   res.send('Hello World')
@@ -29,11 +49,12 @@ app.get('/', async(req, res) => {
 
 app.post("/addAccident", async (req, res) => {
   try {
+    
     const { _loc, _date, _time, snapShot, _plate } = req.body;
-    let _snapShot = await j.add({ base64: snapShot })
+    let _snapShot = await j.add(snapShot)
     _snapShot = _snapShot.toString()
     
-  const contract = await sdk.getContract(process.env.CONTRACT_ADDRESS);
+  ;
 
   const result = await contract.call("addAccident", [_loc, _date, _time, _snapShot, _plate]);
 
@@ -52,14 +73,15 @@ app.post("/userAddsAccident", async (req, res) => {
   try {
     const { snapShot, _loc, _user } = req.body;
     const {latitude, longitude} = _loc
-    let _snapShot = await j.add({ base64: snapShot })
+    let _snapShot = await j.add(snapShot)
     _snapShot = _snapShot.toString()
+    console.log(_snapShot)
 
     // const sdk = ThirdwebSDK.fromWallet(_user, "mumbai", {
     //   secretKey: process.env.SECRET_KEY
     // });
 
-    const contract = await sdk.getContract(process.env.CONTRACT_ADDRESS);
+    ;
 
     const result = await contract.call("userAddsAccident", [_snapShot, latitude, longitude]);
 
@@ -75,7 +97,7 @@ app.post("/userAddsAccident", async (req, res) => {
 
 app.get('/getUserAccidents', async (req, res) => {
   try {
-    const contract = await sdk.getContract(process.env.CONTRACT_ADDRESS);
+    ;
 
     const result = await contract.call("getUserAccidents");
 
@@ -91,23 +113,44 @@ app.get('/getUserAccidents', async (req, res) => {
 
 app.get('/getAccidents', async (req, res) => {
     try {
-        const contract = await sdk.getContract(process.env.CONTRACT_ADDRESS)
-        const result = await contract.call("getAccidents")
+      
+      console.log('this is called')
+        
+        const result = await contract.call("getAccidents", [])
 
 
-        const arrayofMaps = result.map(async(innerArray) => {
-          const map = {};
-          const base64 = await j.get(innerArray[3])
-          map['loc'] = innerArray[0]
-          map['date'] = innerArray[1]
-          map['time'] = innerArray[2]
-          map['snapShot'] = base64.base64
-          map['plate'] = innerArray[4]
-          return map;
-        });
-
-        console.log(arrayofMaps)
-        res.json({success: true, result: arrayofMaps})
+        if(result){
+          const arrayofMapsPromises = result.map(async(innerArray) => {
+            const map = {};
+            const base64Promise = new Promise((resolve, reject) => {
+              console.log(innerArray[3])
+              j.get(innerArray[3]).then((base64) => {
+                console.log('hi', innerArray[3])
+                resolve(base64);
+              }).catch((error) => {
+                reject(error);
+              });
+            });
+            let base64
+            base64Promise.then((_base64) => {
+              console.log(_base64)
+              base64 = _base64.base64
+            }).catch((error) => {
+              base64 = "none"
+            });
+            
+            
+            map['loc'] = innerArray[0]
+            map['date'] = innerArray[1]
+            map['time'] = innerArray[2]
+            map['snapShot'] = base64
+            map['plate'] = innerArray[4]
+            return map;
+          });
+          const arrayofMaps = await Promise.all(arrayofMapsPromises);
+          console.log(arrayofMaps)
+          res.json({success: true, result: arrayofMaps})
+        }
     } catch (error) {
         console.log(error)
     }
@@ -115,7 +158,7 @@ app.get('/getAccidents', async (req, res) => {
 
 app.get('/getAccident/:id', async (req, res) => {
     try {
-        const contract = await sdk.getContract(process.env.CONTRACT_ADDRESS)
+        
         const result = await contract.call("getAccident", [req.params.id])
 
 
@@ -149,7 +192,7 @@ app.post('/bot', async (req, res) => {
       const prompt =`"Hello, I need legal assistance related to the Indian Penal Code (IPC) and other Indian laws. My problem is ${userMessage}. Can you provide me with guidance or information on how to approach this situation within the boundaries of Indian law?"`
       const completion = await openai.createCompletion({
         model: "text-davinci-003",
-        prompt: userMessage, 
+        prompt: prompt, 
         temperature: 0,
         max_tokens: 2048,
       });

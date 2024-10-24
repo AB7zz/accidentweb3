@@ -34,7 +34,11 @@ function ChatApp() {
         // Add the user's message to the state first
         setMessages(updatedMessages);
     
-        const apiUrl = 'http://172.18.100.166:3000/bot';
+<<<<<<< HEAD
+        const apiUrl = 'http://localhost:3000/bot';
+=======
+        const apiUrl = 'https://hackcdent-891d0b31e96e.herokuapp.com/bot';
+>>>>>>> b4f3eb85d67d992a13adc02dd6915f499977161f
     
         const response = await fetch(apiUrl, {
           method: 'POST',
@@ -47,6 +51,7 @@ function ChatApp() {
         if (response.ok) {
           // Get the response data
           const responseData = await response.json();
+          console.log(responseData);
           // Create a message from the response
           const responseMessage = {
             text: responseData.output,

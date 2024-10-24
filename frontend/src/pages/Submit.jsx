@@ -65,7 +65,7 @@ function Submit() {
         _user: address
       };
       // console.log(formData)
-      fetch('http://localhost:3000/userAddsAccident', {
+      fetch('https://hackcdent-891d0b31e96e.herokuapp.com/userAddsAccident', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
