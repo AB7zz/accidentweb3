@@ -1,0 +1,12 @@
+geopy 
+geocoder 
+scikit-image 
+twilio 
+keras 
+pandas 
+matplotlib 
+opencv-python 
+requests
+tensorflow
+numpy
+scikit-learn
