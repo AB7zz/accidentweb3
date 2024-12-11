@@ -2,3 +2,25 @@ traindata
 test
 trained_model.pkl
 venv
+# Environment files
+.env
+*.env
+!.env.example
+
+# Python bytecode
+__pycache__/
+*.py[cod]
+
+# Virtual environments
+venv/
+env/
+.venv/
+
+# Model files
+*.h5
+
+# Logs
+*.log
+
+# Snapshots and temporary files
+AccSnaps/
