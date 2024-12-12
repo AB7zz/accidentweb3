@@ -357,6 +357,8 @@ class AccidentDetectionSystem:
         flag = 0
         snapshot_counter = 0
         imgflag = 0
+        imgsend = 0
+        maxconfidence = 0
 
         while True:
             ret, frame = cap.read()
@@ -385,29 +387,34 @@ class AccidentDetectionSystem:
                 predict = f"Accident {percent:.2f}%"
                 flag = 1
 
-                # Capture snapshot if confidence > 60%
-                if imgflag == 0 and percent > 60:
+                # Capture snapshot if confidence > 70%
+                
+                if imgflag == 0 and percent > 70 and percent > maxconfidence:
+                    maxconfidence = percent
                     AccSnapshotDir = 'AccSnaps/'
                     os.makedirs(AccSnapshotDir, exist_ok=True)
                     snapshot_filename = f'accident_snapshot_{snapshot_counter}.jpg'
                     snapshot_path = os.path.join(AccSnapshotDir, snapshot_filename)
                     cv2.imwrite(snapshot_path, frame)
                     snapshot_counter += 1
-                    imgflag = 1
+                    if percent<60:
+                        imgflag = 1
 
                     # Send SMS Alert
                     try:
-                        # Get location of camera that detected the accident
-                        camera_location = self.get_geolocations().get(self.camera_ips[0], "Unknown Location")
-                        
-                        alert_message = f"""
-ACCIDENT ALERT:
-Time: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
-Location: {camera_location}
-Confidence: {percent:.2f}%
-Snapshot: {snapshot_path}
-"""
-                        self.send_sms_alert(alert_message)
+                        if imgsend == 0:
+                            imgsend = 1
+                            # Get location of camera that detected the accident
+                            camera_location = self.get_geolocations().get(self.camera_ips[0], "Unknown Location")
+                            
+                            alert_message = f"""
+    ACCIDENT ALERT:
+    Time: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+    Location: {camera_location}
+    Confidence: {percent:.2f}%
+    Snapshot: {snapshot_path}
+    """
+                            self.send_sms_alert(alert_message)
                     except Exception as e:
                         logger.error(f"Alert generation failed: {e}")
 
@@ -431,6 +438,7 @@ def main():
     custom_video_ip_mapping = {
         'Accident-1.mp4': '1.39.116.199',
         'Accident-2.mp4': '1.38.116.199',
+        'Accident-3.mp4': '1.37.116.199'
         # Add more mappings as needed
     }
     
