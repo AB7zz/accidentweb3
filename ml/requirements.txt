@@ -10,3 +10,4 @@ requests
 tensorflow
 numpy
 scikit-learn
+python-dotenv
